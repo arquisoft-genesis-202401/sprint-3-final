@@ -1,10 +1,5 @@
 import os
-import base64
 from google.cloud import kms
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.primitives.padding import PKCS7
-from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import hmac, hashes
 
 class CryptoManager:
     def __init__(self):
@@ -14,51 +9,36 @@ class CryptoManager:
         self.key_ring_id = os.getenv("KEY_RING_ID")
         self.crypto_key_id = os.getenv("KEY_AES_ID")
         self.hmac_key_id = os.getenv("KEY_HMAC_ID")
-        self.iv = base64.urlsafe_b64decode(os.getenv("IV"))
-        self.crypto_key_path = self.client.crypto_key_path(self.project_id, self.location_id, self.key_ring_id, self.crypto_key_id)
-        self.hmac_key_path = self.client.crypto_key_path(self.project_id, self.location_id, self.key_ring_id, self.hmac_key_id)
+        self.crypto_key_path = self.client.crypto_key_path(
+            self.project_id, self.location_id, self.key_ring_id, self.crypto_key_id)
+        self.hmac_key_path = self.client.crypto_key_path(
+            self.project_id, self.location_id, self.key_ring_id, self.hmac_key_id)
 
-    def get_key_from_kms(self, key_path):
-        # TODO
-        return None
+    def encrypt_data(self, plaintext):
+        plaintext_bytes = plaintext.encode('utf-8')
+        response = self.client.encrypt(request={'name': self.crypto_key_path, 'plaintext': plaintext_bytes})
+        return response.ciphertext
 
-    def encrypt_data_aes(self, data):
-        key = self.get_key_from_kms(self.crypto_key_path)
-        backend = default_backend()
-        cipher = Cipher(algorithms.AES(key), modes.CBC(self.iv), backend=backend)
-        encryptor = cipher.encryptor()
-        padder = PKCS7(algorithms.AES.block_size).padder()
-        padded_data = padder.update(data) + padder.finalize()
-        encrypted_data = encryptor.update(padded_data) + encryptor.finalize()
-        return encrypted_data
+    def decrypt_data(self, ciphertext):
+        response = self.client.decrypt(request={'name': self.crypto_key_path, 'ciphertext': ciphertext})
+        return response.plaintext.decode('utf-8')
 
-    def decrypt_data_aes(self, encrypted_data):
-        key = self.get_key_from_kms(self.crypto_key_path)
-        backend = default_backend()
-        cipher = Cipher(algorithms.AES(key), modes.CBC(self.iv), backend=backend)
-        decryptor = cipher.decryptor()
-        padded_data = decryptor.update(encrypted_data) + decryptor.finalize()
-        unpadder = PKCS7(algorithms.AES.block_size).unpadder()
-        data = unpadder.update(padded_data) + unpadder.finalize()
-        return data
+    def sign_data(self, data):
+        # Convert data to bytes, if necessary
+        data_bytes = data.encode('utf-8') if isinstance(data, str) else data
+        # Sign the data
+        response = self.client.mac_sign(request={'name': self.hmac_key_path, 'data': data_bytes})
+        return response.mac
 
-    def calculate_hmac(self, data):
-        key = self.get_key_from_kms(self.hmac_key_path)
-        h = hmac.HMAC(key, hashes.SHA256(), backend=default_backend())
-        h.update(data)
-        return h.finalize()
-    
-    def read_binary_file(file_path):
-        try:
-            # Open the file in binary read mode
-            with open(file_path, 'rb') as file:
-                binary_data = file.read()
-                return binary_data
-        except IOError as e:
-            print(f"An error occurred while reading the file: {e}")
-            return None
+    def verify_signature(self, data, signature):
+        # Convert data to bytes, if necessary
+        data_bytes = data.encode('utf-8') if isinstance(data, str) else data
+        # Verify the signature
+        response = self.client.mac_verify(request={'name': self.hmac_key_path, 'data': data_bytes, 'mac': signature})
+        return response.success  # Will be True if verification is successful
 
-# Usage Example:
-crypto_manager = CryptoManager()
-print(crypto_manager.crypto_key_path)
-print(crypto_manager.hmac_key_path)
+cm = CryptoManager()
+ed = cm.encrypt_data("hola :)")
+dd = cm.decrypt_data(ed)
+print(ed)
+print(dd)
