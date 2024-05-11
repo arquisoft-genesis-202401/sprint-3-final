@@ -5,6 +5,7 @@ echo 'export PORT_BUSINESS_DATABASE="${PORT_BUSINESS_DATABASE}"' >> ~/.profile
 echo 'export POSTGRESQL_DB_NAME="${POSTGRESQL_DB_NAME}"' >> ~/.profile
 echo 'export POSTGRESQL_DB_USER="${POSTGRESQL_DB_USER}"' >> ~/.profile
 echo 'export POSTGRESQL_DB_PASSWORD="${POSTGRESQL_DB_PASSWORD}"' >> ~/.profile
+echo 'export IV="${IV}"' >> ~/.profile
 source ~/.profile
 sudo add-apt-repository ppa:deadsnakes/ppa -y
 sudo apt update

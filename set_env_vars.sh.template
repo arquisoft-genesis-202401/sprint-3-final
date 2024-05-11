@@ -8,6 +8,7 @@ export PRIVATE_IP_USER_MANAGER="<IP>"
 export PORT_USER_MANAGER="<PORT>"
 export INTERFACE_USER_MANAGER="<INTERFACE>"
 export INTERFACE_2_USER_MANAGER="<INTERFACE>"
+export IV="<IV>"
 
 
 # Business Database env vars
