@@ -19,17 +19,14 @@ class CryptoManager:
         self.hmac_key_path = self.client.crypto_key_path(self.project_id, self.location_id, self.key_ring_id, self.hmac_key_id)
 
     def get_key_from_kms(self, key_path):
+        """ Retrieve the key material from Google Cloud KMS """
+        # Access the key version's resource name
         key_version = self.client.crypto_key_versions.list(parent=key_path).next()
         response = self.client.crypto_key_versions.get(name=key_version.name)
-        # Assuming the key is symmetric and extractable
-        key = self.client.crypto_key_versions.asymmetric_decrypt(
-            name=key_version.name,
-            ciphertext=response.ciphertext
-        ).plaintext
-        return key
+        return response.name, response.state
 
     def encrypt_data_aes(self, data):
-        key = self.get_key_from_kms(self.crypto_key_path)
+        key, key_status = self.get_key_from_kms(self.crypto_key_path)
         backend = default_backend()
         cipher = Cipher(algorithms.AES(key), modes.CBC(self.iv), backend=backend)
         encryptor = cipher.encryptor()
@@ -39,7 +36,7 @@ class CryptoManager:
         return encrypted_data
 
     def decrypt_data_aes(self, encrypted_data):
-        key = self.get_key_from_kms(self.crypto_key_path)
+        key, key_status = self.get_key_from_kms(self.crypto_key_path)
         backend = default_backend()
         cipher = Cipher(algorithms.AES(key), modes.CBC(self.iv), backend=backend)
         decryptor = cipher.decryptor()
@@ -49,7 +46,7 @@ class CryptoManager:
         return data
 
     def calculate_hmac(self, data):
-        key = self.get_key_from_kms(self.hmac_key_path)
+        key, key_status = self.get_key_from_kms(self.hmac_key_path)
         h = hmac.HMAC(key, hashes.SHA256(), backend=default_backend())
         h.update(data)
         return h.finalize()
