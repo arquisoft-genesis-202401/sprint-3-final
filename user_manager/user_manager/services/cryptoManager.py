@@ -58,7 +58,7 @@ class CryptoManager:
         h.update(data)
         return h.finalize()
     
-    def read_binary_file(file_path):
+    def read_binary_file(self, file_path):
         try:
             # Open the file in binary read mode
             with open(file_path, 'rb') as file:
