@@ -9,6 +9,10 @@ export PORT_USER_MANAGER="<PORT>"
 export INTERFACE_USER_MANAGER="<INTERFACE>"
 export INTERFACE_2_USER_MANAGER="<INTERFACE>"
 export IV="<IV>"
+export LOCATION_ID="<LOCATION>"
+export KEY_RING_ID="<KEYRING>"
+export KEY_AES_ID="<KEY>"
+export KEY_HMAC_ID="<KEY>"
 
 
 # Business Database env vars
