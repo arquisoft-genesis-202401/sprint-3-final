@@ -1,0 +1,99 @@
+resources:
+  # Firewall Rule: Internet to User Manager
+  - name: allow-internet-to-user-manager
+    type: compute.v1.firewall
+    properties:
+      network: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/global/networks/default
+      priority: 1000
+      direction: INGRESS
+      sourceRanges:
+        - ${INTERFACE_USER_MANAGER}
+      targetTags:
+        - user-manager
+      allowed:
+        - IPProtocol: TCP
+          ports:
+            - ${PORT_USER_MANAGER}
+
+  # Firewall Rule: User Manager to Business Database
+  - name: allow-user-manager-to-business-db
+    type: compute.v1.firewall
+    properties:
+      network: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/global/networks/default
+      priority: 1000
+      direction: INGRESS
+      sourceTags:
+        - user-manager
+      targetTags:
+        - business-database
+      allowed:
+        - IPProtocol: TCP
+          ports:
+            - ${PORT_BUSINESS_DATABASE}
+
+  # Virtual machine for User Manager
+  - type: compute.v1.instance
+    name: user-manager-instance
+    properties:
+      zone: us-central1-a
+      machineType: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/zones/us-central1-a/machineTypes/e2-micro
+      disks:
+        - deviceName: boot
+          type: PERSISTENT
+          boot: true
+          autoDelete: true
+          initializeParams:
+            sourceImage: https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/ubuntu-2004-focal-v20240307b
+      networkInterfaces:
+        - network: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/global/networks/default
+          networkIP: ${PRIVATE_IP_USER_MANAGER}
+          accessConfigs:
+            - name: External NAT
+              type: ONE_TO_ONE_NAT
+      tags:
+        items: 
+          - user-manager
+      metadata:
+        items:
+          - key: startup-script
+            value: |
+              #!/bin/bash
+              echo "Done"
+
+  # Virtual machine for Business Database
+  - type: compute.v1.instance
+    name: business-database-instance
+    properties:
+      zone: us-central1-a
+      machineType: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/zones/us-central1-a/machineTypes/e2-micro
+      disks:
+        - deviceName: boot
+          type: PERSISTENT
+          boot: true
+          autoDelete: true
+          initializeParams:
+            sourceImage: https://www.googleapis.com/compute/v1/projects/ubuntu-os-cloud/global/images/ubuntu-2004-focal-v20240307b
+      networkInterfaces:
+        - network: https://www.googleapis.com/compute/v1/projects/${PROJECT_ID}/global/networks/default
+          networkIP: ${PRIVATE_IP_BUSINESS_DATABASE}
+          accessConfigs:
+            - name: External NAT
+              type: ONE_TO_ONE_NAT
+      tags:
+        items: 
+          - business-database
+      metadata:
+        items:
+          - key: startup-script
+            value: |
+              #!/bin/bash
+              sudo apt-get update
+              sudo apt-get install -y postgresql postgresql-contrib
+              sudo -u postgres psql -c "CREATE USER ${POSTGRESQL_DB_USER} WITH PASSWORD '${POSTGRESQL_DB_PASSWORD}';"
+              sudo -u postgres createdb -O ${POSTGRESQL_DB_USER} ${POSTGRESQL_DB_NAME}
+              echo "host all all ${INTERFACE_BUSINESS_DATABASE} trust" | sudo tee -a /etc/postgresql/12/main/pg_hba.conf
+              echo "listen_addresses='${LISTEN_ADDR_BUSINESS_DATABASE}'" | sudo tee -a /etc/postgresql/12/main/postgresql.conf
+              echo "max_connections=${MAX_CONN_BUSINESS_DATABASE}" | sudo tee -a /etc/postgresql/12/main/postgresql.conf
+              sudo sed -i 's/local   all             all                                     peer/local   all             all                                     md5/' /etc/postgresql/12/main/pg_hba.conf
+              sudo service postgresql restart
+              echo "Done"
