@@ -6,7 +6,7 @@ echo 'export POSTGRESQL_DB_NAME="${POSTGRESQL_DB_NAME}"' >> ~/.profile
 echo 'export POSTGRESQL_DB_USER="${POSTGRESQL_DB_USER}"' >> ~/.profile
 echo 'export POSTGRESQL_DB_PASSWORD="${POSTGRESQL_DB_PASSWORD}"' >> ~/.profile
 source ~/.profile
-sudo add-apt-repository ppa:deadsnakes/ppa
+sudo add-apt-repository ppa:deadsnakes/ppa -y
 sudo apt update
 sudo apt install python3.12 -y
 git clone https://github.com/arquisoft-genesis-202401/sprint-3-final.git
