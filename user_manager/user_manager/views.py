@@ -46,21 +46,22 @@ def create_customer_application(request):
 def update_customer_application(request, application_id):
     try:
         # Assuming JSON data is sent in request; validate as needed
-        data = request.body
+        data = json.loads(request.body.decode('utf-8'))
+        
+        # Check required fields
+        required_keys = ["document_type", "document_number", "first_name", "last_name", "country", "state", "city", "address", "mobile_number", "email"]
+        if not all(key in data for key in required_keys):
+            return HttpResponseBadRequest("Missing required fields")
 
         # Extract data from request
-        first_name = data.get('first_name')
-        last_name = data.get('last_name')
-        country = data.get('country')
-        state = data.get('state')
-        city = data.get('city')
-        address = data.get('address')
-        mobile_number = data.get('mobile_number')
-        email = data.get('email')
-
-        # Check required fields
-        if not all([application_id, first_name, last_name, country, state, city, address, mobile_number, email]):
-            return HttpResponseBadRequest("Missing required fields")
+        first_name = data['first_name']
+        last_name = data['last_name']
+        country = data['country']
+        state = data['state']
+        city = data['city']
+        address = data['address']
+        mobile_number = data['mobile_number']
+        email = data['email']
 
         # Call the service function
         result = update_customer_application_basic_info(

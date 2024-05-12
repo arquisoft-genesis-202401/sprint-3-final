@@ -104,7 +104,7 @@ def get_basic_information_by_application_id(application_id):
         
         for field in fields:
             encrypted_data_hmac = getattr(basic_info, field)
-            encrypted_data, stored_hmac = encrypted_data_hmac.split(b';')
+            encrypted_data, stored_hmac = encrypted_data_hmac.split(';')
             encrypted_data_bytes = base64.urlsafe_b64decode(encrypted_data)
             stored_hmac_bytes = base64.urlsafe_b64decode(stored_hmac)
 
