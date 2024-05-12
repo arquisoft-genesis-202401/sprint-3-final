@@ -40,7 +40,7 @@ class CryptoModule:
         """ Calculate HMAC for the provided data """
         h = hmac.HMAC(self.hmac_key, hashes.SHA256(), backend=default_backend())
         h.update(data)
-        return h.finalize()
+        return base64.urlsafe_b64encode(h.finalize())
 
 # Usage of the CryptoModule
 crypto = CryptoModule()
