@@ -8,10 +8,9 @@ export PRIVATE_IP_USER_MANAGER="<IP>"
 export PORT_USER_MANAGER="<PORT>"
 export INTERFACE_USER_MANAGER="<INTERFACE>"
 export INTERFACE_2_USER_MANAGER="<INTERFACE>"
-export LOCATION_ID="<LOCATION>"
-export KEY_RING_ID="<KEYRING>"
-export KEY_AES_ID="<KEY>"
-export KEY_HMAC_ID="<KEY>"
+export AES_KEY="<KEY>"
+export HAMC_KEY="<KEY>"
+export IV="<IV>"
 
 
 # Business Database env vars
