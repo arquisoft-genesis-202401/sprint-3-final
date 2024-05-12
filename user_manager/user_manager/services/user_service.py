@@ -83,7 +83,7 @@ def update_customer_application_basic_info(application_id, first_name, last_name
         data_to_encrypt = field.encode('utf-8')
         encrypted_data = crypto.encrypt_data(data_to_encrypt)
         data_hmac = crypto.calculate_hmac(data_to_encrypt)
-        encrypted_field = encrypted_data + b';' + data_hmac
+        encrypted_field = encrypted_data + ";" + data_hmac
         setattr(basic_information, field_names[index], encrypted_field)
 
     # Update modification date and save the changes
