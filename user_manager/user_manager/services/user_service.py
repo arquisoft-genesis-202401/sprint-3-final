@@ -114,7 +114,7 @@ def get_basic_information_by_application_id(application_id):
             if calculated_hmac != stored_hmac:
                 return {"error": f"Integrity check failed for {field}"}
 
-            decrypted_info[field.lower()] = decrypted_data.decode('utf-8')
+            decrypted_info[field.lower()] = decrypted_data
 
         return decrypted_info
 
