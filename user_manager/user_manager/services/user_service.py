@@ -55,7 +55,7 @@ def create_customer_application_basic_info(document_type, document_number, first
         ModificationDate=timezone.now()
     )
 
-    return application
+    return application.pk
 
 
 @transaction.atomic
