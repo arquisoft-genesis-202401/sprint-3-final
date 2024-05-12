@@ -117,6 +117,8 @@ def get_basic_information_by_application_id(application_id):
 
             # Decrypt the data
             decrypted_data = crypto.decrypt_data(encrypted_data)
+
+            print(decrypted_data)
             
             # Calculate HMAC of the decrypted data and compare with stored HMAC
             calculated_hmac = crypto.calculate_hmac(decrypted_data)
