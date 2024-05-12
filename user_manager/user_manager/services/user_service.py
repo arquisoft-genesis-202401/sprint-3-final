@@ -105,24 +105,16 @@ def get_basic_information_by_application_id(application_id):
         for field in fields:
             encrypted_data_hmac = getattr(basic_info, field)
             encrypted_data, stored_hmac = encrypted_data_hmac.split(';')
-            encrypted_data_bytes = base64.urlsafe_b64decode(encrypted_data)
-            stored_hmac_bytes = base64.urlsafe_b64decode(stored_hmac)
 
             # Decrypt the data
-            decrypted_data = crypto.decrypt_data(encrypted_data_bytes)
+            decrypted_data = crypto.decrypt_data(encrypted_data)
             
             # Calculate HMAC of the decrypted data and compare with stored HMAC
             calculated_hmac = crypto.calculate_hmac(decrypted_data)
-            if calculated_hmac != stored_hmac_bytes:
+            if calculated_hmac != stored_hmac:
                 return {"error": f"Integrity check failed for {field}"}
 
             decrypted_info[field.lower()] = decrypted_data.decode('utf-8')
-
-        # Append creation and modification dates to the dictionary
-        decrypted_info.update({
-            "creation_date": basic_info.CreationDate,
-            "modification_date": basic_info.ModificationDate
-        })
 
         return decrypted_info
 
