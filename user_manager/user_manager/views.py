@@ -49,7 +49,7 @@ def update_customer_application(request, application_id):
         data = json.loads(request.body.decode('utf-8'))
         
         # Check required fields
-        required_keys = ["document_type", "document_number", "first_name", "last_name", "country", "state", "city", "address", "mobile_number", "email"]
+        required_keys = ["first_name", "last_name", "country", "state", "city", "address", "mobile_number", "email"]
         if not all(key in data for key in required_keys):
             return HttpResponseBadRequest("Missing required fields")
 
