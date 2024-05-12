@@ -12,6 +12,11 @@ def create_customer_application(request):
     try:
         # Assuming JSON data is sent in request; validate as needed
         data = json.loads(request.body.decode('utf-8'))
+        
+        # Check required fields
+        required_keys = ["document_type", "document_number", "first_name", "last_name", "country", "state", "city", "address", "mobile_number", "email"]
+        if not all(key in data for key in required_keys):
+            return HttpResponseBadRequest("Missing required fields")
 
         # Extract data from request
         document_type = data['document_type']
@@ -23,11 +28,7 @@ def create_customer_application(request):
         city = data['city']
         address = data['address']
         mobile_number = data['mobile_number']
-        email = data['email']
-
-        # Check required fields
-        if not all([document_type, document_number, first_name, last_name, country, state, city, address, mobile_number, email]):
-            return HttpResponseBadRequest("Missing required fields")
+        email = data['email']            
 
         # Call the service function
         application_id = create_customer_application_basic_info(
