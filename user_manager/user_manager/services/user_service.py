@@ -37,6 +37,8 @@ def create_customer_application_basic_info(document_type, document_number, first
     for index, field in enumerate(['FirstName', 'LastName', 'Country', 'State', 'City', 'Address', 'MobileNumber', 'Email']):
         data_to_encrypt = fields[index].encode('utf-8')
         encrypted_data = crypto.encrypt_data(data_to_encrypt)
+        if field == "FirstName":
+            print(encrypted_data)
         data_hmac = crypto.calculate_hmac(data_to_encrypt)
         encrypted_fields[field] = encrypted_data + b';' + data_hmac
 
@@ -105,6 +107,9 @@ def get_basic_information_by_application_id(application_id):
         for field in fields:
             encrypted_data_hmac = getattr(basic_info, field)
             encrypted_data, stored_hmac = encrypted_data_hmac.split(';')
+
+            if field == "FirstName":
+                print(encrypted_data)
 
             # Decrypt the data
             decrypted_data = crypto.decrypt_data(encrypted_data)
