@@ -23,7 +23,7 @@ class CryptoModule:
         padder = PKCS7(algorithms.AES.block_size).padder()
         padded_data = padder.update(data) + padder.finalize()
         encrypted_data = encryptor.update(padded_data) + encryptor.finalize()
-        return base64.urlsafe_b64encode(encrypted_data)
+        return base64.urlsafe_b64encode(encrypted_data).decode('utf-8')
 
     def decrypt_data(self, encrypted_data):
         """ Decrypt data using AES CBC mode with PKCS7 padding """
@@ -34,10 +34,10 @@ class CryptoModule:
         padded_data = decryptor.update(encrypted_data) + decryptor.finalize()
         unpadder = PKCS7(algorithms.AES.block_size).unpadder()
         data = unpadder.update(padded_data) + unpadder.finalize()
-        return data
+        return data.decode('utf-8')
 
     def calculate_hmac(self, data):
         """ Calculate HMAC for the provided data """
         h = hmac.HMAC(self.hmac_key, hashes.SHA256(), backend=default_backend())
         h.update(data)
-        return base64.urlsafe_b64encode(h.finalize())
+        return base64.urlsafe_b64encode(h.finalize()).decode('utf-8')
