@@ -40,13 +40,14 @@ class Application(models.Model):
 # BasicInformation Model
 class BasicInformation(models.Model):
     ApplicationID = models.OneToOneField(Application, on_delete=models.CASCADE, primary_key=True)
-    FirstName = models.CharField(max_length=100)
-    LastName = models.CharField(max_length=100)
-    Country = models.CharField(max_length=100)
-    State = models.CharField(max_length=100)
-    City = models.CharField(max_length=100)
-    MobileNumber = models.CharField(max_length=20)
-    Email = models.EmailField()
+    FirstName = models.TextField(max_length=300)  
+    LastName = models.TextField(max_length=300)  
+    Country = models.TextField(max_length=300)  
+    State = models.TextField(max_length=300)  
+    City = models.TextField(max_length=300)  
+    Address = models.TextField(max_length=300)  
+    MobileNumber = models.TextField(max_length=300)  
+    Email = models.TextField(max_length=300)  
     CreationDate = models.DateTimeField(default=timezone.now)
     ModificationDate = models.DateTimeField(auto_now=True)
 

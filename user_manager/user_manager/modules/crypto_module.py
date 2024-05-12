@@ -41,12 +41,3 @@ class CryptoModule:
         h = hmac.HMAC(self.hmac_key, hashes.SHA256(), backend=default_backend())
         h.update(data)
         return base64.urlsafe_b64encode(h.finalize())
-
-# Usage of the CryptoModule
-crypto = CryptoModule()
-encrypted = crypto.encrypt_data(b"Hello, world!")
-print("Encrypted:", encrypted)
-decrypted = crypto.decrypt_data(encrypted)
-print("Decrypted:", decrypted)
-hmac_result = crypto.calculate_hmac(b"Hello, world!")
-print("HMAC:", hmac_result)
