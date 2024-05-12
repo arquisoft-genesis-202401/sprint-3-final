@@ -42,7 +42,7 @@ def create_customer_application_basic_info(document_type, document_number, first
             print(len(encrypted_data))
             print("get info")
         data_hmac = crypto.calculate_hmac(data_to_encrypt)
-        encrypted_fields[field] = encrypted_data + b';' + data_hmac
+        encrypted_fields[field] = encrypted_data + ";" + data_hmac
 
     # Store encrypted data and HMAC in the database
     basic_information = BasicInformation.objects.create(
