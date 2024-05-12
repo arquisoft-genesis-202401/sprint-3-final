@@ -2,60 +2,68 @@ from django.db import transaction
 from ..models import Customer, Application, ApplicationStatus, BasicInformation
 from django.utils import timezone
 from ..modules.crypto_module import CryptoModule
-import base64
 
 @transaction.atomic
-def create_customer_application_basic_info(document_type, document_number, first_name, last_name, country, state, city, address, mobile_number, email):
-    # Check if the customer already exists
-    customer, created = Customer.objects.get_or_create(
+def create_customer_application_basic_info(
+    document_type: str, document_number: str, first_name: str, last_name: str,
+    country: str, state: str, city: str, address: str, mobile_number: str, email: str
+) -> int:
+    customer, _ = get_or_create_customer(document_type, document_number)
+    status = get_or_create_application_status()
+    application = create_application(customer, status)
+    encrypted_fields = encrypt_and_store_fields(
+        first_name, last_name, country, state, city, address, mobile_number, email
+    )
+    store_basic_information(application, encrypted_fields)
+    return application.pk
+
+def get_or_create_customer(document_type: str, document_number: str):
+    return Customer.objects.get_or_create(
         DocumentType=document_type,
         DocumentNumber=document_number,
         defaults={'DocumentType': document_type, 'DocumentNumber': document_number}
     )
 
-    # Get the predefined ApplicationStatus for "BasicInfo"
-    status, status_created = ApplicationStatus.objects.get_or_create(
+def get_or_create_application_status():
+    return ApplicationStatus.objects.get_or_create(
         StatusDescription='BasicInfo',
-        defaults={'StatusDescription': 'BasicInfo', 'CreationDate': timezone.now(), 'ModificationDate': timezone.now()}
+        defaults={'StatusDescription': 'BasicInfo', 'CreationDate': now(), 'ModificationDate': now()}
     )
 
-    # Create an Application for this customer with the "BasicInfo" status
-    application = Application.objects.create(
+def create_application(customer, status):
+    return Application.objects.create(
         CustomerID=customer,
         StatusID=status,
-        CreationDate=timezone.now(),
-        ModificationDate=timezone.now()
+        CreationDate=now(),
+        ModificationDate=now()
     )
 
-    # Initialize the cryptography module
+def encrypt_and_store_fields(*fields: str):
     crypto = CryptoModule()
-
-    # Encrypt and store each field individually with HMAC
-    fields = [first_name, last_name, country, state, city, address, mobile_number, email]
     encrypted_fields = {}
+    field_names = ['FirstName', 'LastName', 'Country', 'State', 'City', 'Address', 'MobileNumber', 'Email']
 
-    for index, field in enumerate(['FirstName', 'LastName', 'Country', 'State', 'City', 'Address', 'MobileNumber', 'Email']):
-        data_to_encrypt = fields[index].encode('utf-8')
-        encrypted_data = crypto.encrypt_data(data_to_encrypt)
-        data_hmac = crypto.calculate_hmac(data_to_encrypt)
-        encrypted_fields[field] = encrypted_data + ";" + data_hmac
+    for field, name in zip(fields, field_names):
+        encoded_field = field.encode('utf-8')
+        encrypted_fields[name] = encrypt_and_hash_field(crypto, encoded_field)
 
-    # Store encrypted data and HMAC in the database
-    basic_information = BasicInformation.objects.create(
+    return encrypted_fields
+
+def encrypt_and_hash_field(crypto, data):
+    encrypted_data = crypto.encrypt_data(data)
+    data_hmac = crypto.calculate_hmac(data)
+    return encrypted_data + ";" + data_hmac
+
+def store_basic_information(application, encrypted_fields):
+    return BasicInformation.objects.create(
         ApplicationID=application,
-        FirstName=encrypted_fields['FirstName'],
-        LastName=encrypted_fields['LastName'],
-        Country=encrypted_fields['Country'],
-        State=encrypted_fields['State'],
-        City=encrypted_fields['City'],
-        Address=encrypted_fields['Address'],
-        MobileNumber=encrypted_fields['MobileNumber'],
-        Email=encrypted_fields['Email'],
-        CreationDate=timezone.now(),
-        ModificationDate=timezone.now()
+        **encrypted_fields,
+        CreationDate=now(),
+        ModificationDate=now()
     )
 
-    return application.pk
+def now():
+    return timezone.now()
 
 
 @transaction.atomic
