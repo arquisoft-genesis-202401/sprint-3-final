@@ -55,20 +55,14 @@ def create_customer_application_basic_info(document_type, document_number, first
         ModificationDate=timezone.now()
     )
 
-    return application.id
+    return application
 
 
 @transaction.atomic
-def update_customer_application_basic_info(document_type, document_number, application_id, first_name, last_name, country, state, city, address, mobile_number, email):
-    # Find the customer based on DocumentType and DocumentNumber
-    try:
-        customer = Customer.objects.get(DocumentType=document_type, DocumentNumber=document_number)
-    except Customer.DoesNotExist:
-        return "Customer not found."
-
+def update_customer_application_basic_info(application_id, first_name, last_name, country, state, city, address, mobile_number, email):
     # Check if the application exists and belongs to this customer
     try:
-        application = Application.objects.get(pk=application_id, CustomerID=customer)
+        application = Application.objects.get(pk=application_id)
     except Application.DoesNotExist:
         return "Application not found for this customer."
 
