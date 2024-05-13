@@ -3,7 +3,6 @@ from cryptography.hazmat.primitives.padding import PKCS7
 from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hmac, hashes
 import base64
-import os
 from ..settings import VARS
 
 class CryptoModule:
