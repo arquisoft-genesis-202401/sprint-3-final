@@ -80,14 +80,14 @@ def get_latest_application_service(document_type, document_number, phone_number)
 
 @transaction.atomic
 def bind_phone_service(document_type, document_number, application_id, phone_number):
-    # Fetch the customer based on document type and document number
     try:
+        # Fetch the customer based on document type and document number
         customer = Customer.objects.get(DocumentType=document_type, DocumentNumber=document_number)
     except Customer.DoesNotExist:
         return "Customer not found."
     
-    # Fetch the application to be updated
     try:
+        # Fetch the application to be updated
         application = Application.objects.get(pk=application_id, CustomerID=customer)
     except Application.DoesNotExist:
         return "Application not found."
@@ -111,17 +111,16 @@ def bind_phone_service(document_type, document_number, application_id, phone_num
     # Create the BasicInformation linked to the application with empty fields except for the encrypted mobile number
     BasicInformation.objects.create(
         ApplicationID=application,
-        defaults={
-            'FirstName': '',
-            'LastName': '',
-            'Country': '',
-            'State': '',
-            'City': '',
-            'Address': '',
-            'MobileNumber': encrypted_phone_number,
-            'Email': '',
-            'CreationDate': timezone.now()
-        }
+        FirstName='',
+        LastName='',
+        Country='',
+        State='',
+        City='',
+        Address='',
+        MobileNumber=encrypted_phone_number,
+        Email='',
+        CreationDate=timezone.now(),
+        ModificationDate=timezone.now()
     )
 
     return application_id
