@@ -1,11 +1,13 @@
 import json
 import base64
-from datetime import datetime, timedelta
+from datetime import datetime, timezone, timedelta
 
 class SessionModule:
     def __init__(self, application_id):
         self.application_id = application_id
-        self.creation_date =  datetime.now(datetime.UTC)
+        timezone_offset = -8.0 # Pacific Standard Time (UTC−08:00)
+        tzinfo = timezone(timedelta(hours=timezone_offset))
+        self.creation_date = datetime.now(tzinfo)
         self.ttl = timedelta(hours=1)  # Example: 1 hour TTL
 
     def serialize_data(self):
