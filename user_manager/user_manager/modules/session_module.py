@@ -13,7 +13,7 @@ class SessionModule:
         """ Serialize header and payload into JSON """
         header = {
             "Creation Date": datetime.now(self.tzinfo).isoformat(),
-            "TTL": str(self.ttl)
+            "TTL": self.ttl.total_seconds() / 3600  # Store TTL in hours as a float
         }
         payload = {
             "Application ID": application_id
@@ -51,7 +51,8 @@ class SessionModule:
 
             # Verify token expiration
             creation_date = datetime.fromisoformat(header['Creation Date'])
-            ttl = timedelta(seconds=float(header['TTL'].replace(" hours", "")) * 3600)  # Convert hours to seconds
+            ttl_hours = float(header['TTL'])  # 'TTL' is already in hours as a float
+            ttl = timedelta(hours=ttl_hours)
             expiration_date = creation_date + ttl
             
             if datetime.now(self.tzinfo) > expiration_date:
@@ -67,7 +68,7 @@ class SessionModule:
         try:
             decoded_token = base64.standard_b64decode(token).decode("utf-8")
             _, payload_json, _ = decoded_token.split(";")
-            payload = json.loads(payload_json.decode('utf-8'))
+            payload = json.loads(payload_json)
             application_id = payload["Application ID"]
             return application_id
         except Exception as e:
