@@ -79,7 +79,10 @@ def create_customer_application(request):
 
     except Exception as e:
         traceback.print_exc(file=sys.stdout)
-        return HttpResponseBadRequest(f"An error occurred: {str(e)}")
+        message = str(e)
+        if "twilio" in message:
+            message = "Invalid OTP"
+        return HttpResponseBadRequest(f"An error occurred: {message}")
     
 @require_http_methods(['POST'])
 def create_update_application_basic_info(request, application_id):
