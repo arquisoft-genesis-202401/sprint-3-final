@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 class SessionModule:
     def __init__(self, application_id):
         self.application_id = application_id
-        self.creation_date =  datetime.datetime.now(datetime.UTC)
+        self.creation_date =  datetime.now(datetime.UTC)
         self.ttl = timedelta(hours=1)  # Example: 1 hour TTL
 
     def serialize_data(self):
