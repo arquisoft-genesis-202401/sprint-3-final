@@ -1,7 +1,7 @@
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.http import require_http_methods
-from .services.user_service import create_customer_application_basic_info
-from .services.user_service import update_customer_application_basic_info
+from .services.user_service import create_customer_application
+from .services.user_service import create_update_application_basic_info
 from .services.user_service import get_basic_information_by_application_id
 import traceback
 import sys
