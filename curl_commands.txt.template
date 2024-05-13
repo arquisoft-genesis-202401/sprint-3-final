@@ -32,7 +32,6 @@ curl -X POST http://<PUBLIC_IP>:<PORT>/update-application/1/ \
     "state": "California",
     "city": "San Francisco",
     "address": "101 Example Ave Updated",
-    "mobile_number": "0987654321",
     "email": "jane.doe@example.com"
 }'
 

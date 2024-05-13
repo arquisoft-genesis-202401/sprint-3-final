@@ -1,9 +1,10 @@
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.http import require_http_methods
 from .services.user_service import create_customer_application_service
-from .services.user_service import create_update_application_basic_info_service
+from .services.user_service import update_application_basic_info_service
 from .services.user_service import get_basic_information_by_application_service
 from .services.user_service import get_latest_application_service
+from .services.user_service import bind_phone_service
 import traceback
 import sys
 import json
@@ -68,6 +69,13 @@ def create_customer_application(request):
             document_type, document_number
         )
 
+        result = bind_phone_service(document_type, document_number, application_id, phone_number)
+
+        # Handle service function responses
+        error_messages = ["Customer not found.", "Application not found.", "Access denied. Updates can only be made to the most recent application."]
+        if result in error_messages:
+            return HttpResponseBadRequest(result)
+
         # Generate token
         session_module = SessionModule()
         token = session_module.create_token(application_id)
@@ -110,9 +118,10 @@ def get_customer_latest_application(request):
             return HttpResponseBadRequest("Invalid OTP")
 
         # Call the service function to get the latest application
-        application_id = get_latest_application_service(document_type, document_number)
-        if not application_id:
-            return HttpResponseBadRequest("No application found for the given details")
+        result = get_latest_application_service(document_type, document_number, phone_number)
+        if "error" in result:
+            return HttpResponseBadRequest(result["error"])
+        application_id = result["application_id"]
 
         # Generate token
         session_module = SessionModule()
@@ -132,7 +141,7 @@ def get_customer_latest_application(request):
         return HttpResponseBadRequest(f"An error occurred: {str(e)}")
     
 @require_http_methods(['POST'])
-def create_update_application_basic_info(request, application_id):
+def update_application_basic_info(request, application_id):
     try:
         # Extract the token from the request headers
         token = request.headers.get('Authorization')
@@ -153,7 +162,7 @@ def create_update_application_basic_info(request, application_id):
         data = json.loads(request.body.decode('utf-8'))
         
         # Payload Checks
-        required_keys = ["document_type", "document_number", "first_name", "last_name", "country", "state", "city", "address", "mobile_number", "email"]
+        required_keys = ["document_type", "document_number", "first_name", "last_name", "country", "state", "city", "address", "email"]
         if len(data) != len(required_keys):
             return HttpResponseBadRequest("Invalid payload fields")
         if not all(key in data for key in required_keys):
@@ -168,16 +177,15 @@ def create_update_application_basic_info(request, application_id):
         state = data['state']
         city = data['city']
         address = data['address']
-        mobile_number = data['mobile_number']
         email = data['email']
 
         # Call the service function
-        result = create_update_application_basic_info_service(
-            document_type, document_number, application_id, first_name, last_name, country, state, city, address, mobile_number, email
+        result = update_application_basic_info_service(
+            document_type, document_number, application_id, first_name, last_name, country, state, city, address, email
         )
 
         # Handle service function responses
-        error_messages = ["Customer not found.", "Application not found.", "Access denied. Updates can only be made to the most recent application."]
+        error_messages = ["Customer not found.", "Application not found.", "Access denied. Updates can only be made to the most recent application.", "BasicInformation not found for the provided Application ID"]
         if result in error_messages:
             return HttpResponseBadRequest(result)
 
