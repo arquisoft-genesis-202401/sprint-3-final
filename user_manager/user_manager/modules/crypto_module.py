@@ -4,18 +4,15 @@ from cryptography.hazmat.backends import default_backend
 from cryptography.hazmat.primitives import hmac, hashes
 import base64
 import os
-#from ..settings import VARS
+from ..settings import VARS
 
 class CryptoModule:
     def __init__(self):
         """ Initialize the module with AES key, HMAC key, and IV from environment variables """
         try:
-            #self.aes_key = base64.urlsafe_b64decode(VARS["AES_KEY"])
-            #self.hmac_key = base64.urlsafe_b64decode(VARS["HMAC_KEY"])
-            #self.iv = base64.urlsafe_b64decode(VARS["IV"])
-            self.aes_key = base64.urlsafe_b64decode(os.getenv("AES_KEY"))
-            self.hmac_key = base64.urlsafe_b64decode(os.getenv("HMAC_KEY"))
-            self.iv = base64.urlsafe_b64decode(os.getenv("IV"))
+            self.aes_key = base64.urlsafe_b64decode(VARS["AES_KEY"])
+            self.hmac_key = base64.urlsafe_b64decode(VARS["HMAC_KEY"])
+            self.iv = base64.urlsafe_b64decode(VARS["IV"])
         except TypeError as e:
             raise ValueError("Environment variables for keys and IV are not properly set.") from e
 

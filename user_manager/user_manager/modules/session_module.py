@@ -26,8 +26,8 @@ class SessionModule:
         """ Encode the header, payload and signature into a Base64 string """
         header_json, payload_json = self.serialize_data(application_id)
         cryptoModule = CryptoModule()
-        signature = cryptoModule.calculate_hmac((header_json + payload_json).encode())
-        token = f"{header_json}.{payload_json}.{signature}"
+        signature = cryptoModule.calculate_hmac((f"{header_json};{payload_json}").encode())
+        token = f"{header_json};{payload_json};{signature}"
         encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
         return encoded_token
 
@@ -39,14 +39,11 @@ class SessionModule:
         """ Verify the token by checking the signature """
         try:
             decoded_token = base64.standard_b64decode(token).decode("utf-8")
-            print(decoded_token)
-            return True
-            encoded_header, encoded_payload, signature = token.split('.')
-            header_payload = f"{encoded_header}.{encoded_payload}"
-            decoded_header_payload = base64.urlsafe_b64decode(header_payload.encode()).decode()
+            header_json, payload_json, signature = decoded_token.split(";")
+            header_payload = f"{header_json};{payload_json}"
             
             cryptoModule = CryptoModule()
-            expected_signature = cryptoModule.calculate_hmac(decoded_header_payload.encode())
+            expected_signature = cryptoModule.calculate_hmac(header_payload.encode())
         
             if signature == expected_signature:
                 return True
