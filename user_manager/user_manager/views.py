@@ -65,7 +65,9 @@ def create_update_application_basic_info(request, application_id):
         )
 
         # Handle service function responses
-        if result == "Basic Information not found for this application.":
+        if result == "Application not found.":
+            return HttpResponseBadRequest(result)
+        if result == "This is not the most recent application. Updates can only be made to the most recent application.":
             return HttpResponseBadRequest(result)
 
         # If all goes well, return the application ID
