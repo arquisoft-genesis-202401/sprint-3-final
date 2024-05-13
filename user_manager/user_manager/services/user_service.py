@@ -29,6 +29,31 @@ def create_customer_application_service(document_type, document_number):
     return application.id
 
 @transaction.atomic
+def get_latest_application_service(document_type, document_number):
+    try:
+        # Fetch the customer based on document type and document number
+        customer = Customer.objects.filter(
+            DocumentType=document_type,
+            DocumentNumber=document_number
+        ).first()
+
+        if not customer:
+            return None  # No customer found with the given details
+
+        # Get the latest application for this customer
+        latest_application = Application.objects.filter(
+            CustomerID=customer
+        ).order_by('-CreationDate').first()  # Order by creation date descending and get the first
+
+        if latest_application:
+            return latest_application.id  # Return the application ID
+        else:
+            return None  # No application found for this customer
+    except Exception as e:
+        print(f"Failed to retrieve latest application: {e}")
+        return None
+
+@transaction.atomic
 def create_update_application_basic_info_service(application_id, first_name, last_name, country, state, city, address, mobile_number, email):
     # Check if the application exists and is the most recent one
     try:

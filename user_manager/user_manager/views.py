@@ -3,6 +3,7 @@ from django.views.decorators.http import require_http_methods
 from .services.user_service import create_customer_application_service
 from .services.user_service import create_update_application_basic_info_service
 from .services.user_service import get_basic_information_by_application_service
+from .services.user_service import get_latest_application_service
 import traceback
 import sys
 import json
@@ -83,6 +84,52 @@ def create_customer_application(request):
         if "twilio" in message:
             message = "Non existing OTP verification"
         return HttpResponseBadRequest(f"An error occurred: {message}")
+
+@require_http_methods(['POST'])
+def get_customer_latest_application(request):
+    try:
+        # Assuming JSON data is sent in request; validate as needed
+        data = json.loads(request.body.decode('utf-8'))
+
+        # Payload Checks
+        required_keys = ["document_type", "document_number", "otp", "phone_number"]
+        if len(data) != len(required_keys):
+            return HttpResponseBadRequest("Invalid payload fields")
+        if not all(key in data for key in required_keys):
+            return HttpResponseBadRequest("Missing or invalid required fields")
+
+        # Extract data from request
+        document_type = data['document_type']
+        document_number = data['document_number']
+        otp = data['otp']
+        phone_number = data['phone_number']
+
+        # Verify OTP
+        otp_module = OTPModule()
+        if not otp_module.verify_otp(phone_number, otp):
+            return HttpResponseBadRequest("Invalid OTP")
+
+        # Call the service function to get the latest application
+        application_id = get_latest_application_service(document_type, document_number)
+        if not application_id:
+            return HttpResponseBadRequest("No application found for the given details")
+
+        # Generate token
+        session_module = SessionModule()
+        token = session_module.create_token(application_id)
+
+        # Return the application ID and token
+        return JsonResponse({
+            'application_id': application_id,
+            'token': token
+        })
+
+    except Exception as e:
+        traceback.print_exc(file=sys.stdout)
+        message = str(e)
+        if "twilio" in message:
+            message = "Non existing OTP verification"
+        return HttpResponseBadRequest(f"An error occurred: {str(e)}")
     
 @require_http_methods(['POST'])
 def create_update_application_basic_info(request, application_id):
