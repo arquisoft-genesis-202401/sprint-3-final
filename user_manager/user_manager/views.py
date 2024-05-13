@@ -81,7 +81,7 @@ def create_customer_application(request):
     except Exception as e:
         traceback.print_exc(file=sys.stdout)
         message = str(e)
-        if "twilio" in message:
+        if "twilio" in message.lower():
             message = "Non existing OTP verification"
         return HttpResponseBadRequest(f"An error occurred: {message}")
 
@@ -127,7 +127,7 @@ def get_customer_latest_application(request):
     except Exception as e:
         traceback.print_exc(file=sys.stdout)
         message = str(e)
-        if "twilio" in message:
+        if "twilio" in message.lower():
             message = "Non existing OTP verification"
         return HttpResponseBadRequest(f"An error occurred: {str(e)}")
     
