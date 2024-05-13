@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 class SessionModule:
     def __init__(self, application_id):
         self.application_id = application_id
-        self.creation_date = datetime.utcnow()
+        self.creation_date =  datetime.datetime.now(datetime.UTC)
         self.ttl = timedelta(hours=1)  # Example: 1 hour TTL
 
     def serialize_data(self):
@@ -24,7 +24,8 @@ class SessionModule:
     def encode_token(self):
         """ Encode the header, payload and signature into a Base64 string """
         header_json, payload_json = self.serialize_data()
-        signature = CryptoModule.calculate_hmac(header_json + payload_json)
+        cryptoModule = CryptoModule()
+        signature = cryptoModule.calculate_hmac((header_json + payload_json).encode())
         token = f"{header_json}.{payload_json}.{signature}"
         encoded_token = base64.urlsafe_b64encode(token.encode()).decode()
         return encoded_token
