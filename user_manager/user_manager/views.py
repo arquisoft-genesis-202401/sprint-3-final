@@ -6,7 +6,37 @@ from .services.user_service import get_basic_information_by_application_service
 import traceback
 import sys
 import json
+from .modules.otp_module import OTPModule
 
+@require_http_methods(['POST'])
+def send_otp_to_phone(request):
+    try:
+        # Assuming JSON data is sent in the request; validate as needed
+        data = json.loads(request.body.decode('utf-8'))
+        
+        # Payload Checks
+        if len(data) != 1:
+            return HttpResponseBadRequest("Invalid payload fields")
+        if 'phone_number' not in data:
+            return HttpResponseBadRequest("Missing required field: phone_number")
+        
+        # Extract phone number from request
+        phone_number = data['phone_number']
+        
+        # Call the service function to send an OTP
+        otp_module = OTPModule()
+        success = otp_module.send_otp(phone_number)
+        print(success)
+        
+        if success:
+            return JsonResponse({'message': 'OTP sent successfully.', 'phone_number': phone_number})
+        else:
+            return HttpResponseBadRequest(f"Failed to send OTP")
+    
+    except Exception as e:
+        traceback.print_exc(file=sys.stdout)
+        return HttpResponseBadRequest(f"An error occurred: {str(e)}")
+    
 @require_http_methods(['POST'])
 def create_customer_application(request):
     try:

@@ -35,7 +35,7 @@ def create_update_application_basic_info_service(application_id, first_name, las
         application = Application.objects.get(pk=application_id)
         latest_application = Application.objects.latest('CreationDate')
         if application != latest_application:
-            return "This is not the most recent application. Updates can only be made to the most recent application."
+            return "Access denied. Updates can only be made to the most recent application."
     except Application.DoesNotExist:
         return "Application not found."
 

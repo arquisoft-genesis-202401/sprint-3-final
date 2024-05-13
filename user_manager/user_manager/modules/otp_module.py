@@ -21,7 +21,6 @@ class OTPModule:
         """
         verify = self.client.verify.v2.services(self.service_sid)
         verify.verifications.create(to=phone_number, channel='sms')
-        print("OTP has been sent to:", phone_number)
 
     def verify_otp(self, phone_number, otp_code):
         """
