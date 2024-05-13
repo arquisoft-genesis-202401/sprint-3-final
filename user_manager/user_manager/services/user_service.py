@@ -4,7 +4,7 @@ from django.utils import timezone
 from ..modules.crypto_module import CryptoModule
 
 @transaction.atomic
-def create_customer_application(document_type, document_number):
+def create_customer_application_service(document_type, document_number):
     # Check if the customer already exists
     customer, created = Customer.objects.get_or_create(
         DocumentType=document_type,
@@ -29,7 +29,7 @@ def create_customer_application(document_type, document_number):
     return application.id
 
 @transaction.atomic
-def create_update_application_basic_info(application_id, first_name, last_name, country, state, city, address, mobile_number, email):
+def create_update_application_basic_info_service(application_id, first_name, last_name, country, state, city, address, mobile_number, email):
     # Check if the application exists
     try:
         application = Application.objects.get(pk=application_id)
@@ -66,7 +66,7 @@ def create_update_application_basic_info(application_id, first_name, last_name, 
 
     return application_id
 
-def get_basic_information_by_application_id(application_id):
+def get_basic_information_by_application_service(application_id):
     try:
         # Retrieve the BasicInformation associated with the given Application ID
         basic_info = BasicInformation.objects.get(ApplicationID__id=application_id)

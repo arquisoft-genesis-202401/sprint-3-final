@@ -1,8 +1,8 @@
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.views.decorators.http import require_http_methods
-from .services.user_service import create_customer_application
-from .services.user_service import create_update_application_basic_info
-from .services.user_service import get_basic_information_by_application_id
+from .services.user_service import create_customer_application_service
+from .services.user_service import create_update_application_basic_info_service
+from .services.user_service import get_basic_information_by_application_service
 import traceback
 import sys
 import json
@@ -25,7 +25,7 @@ def create_customer_application(request):
         document_number = data['document_number']           
 
         # Call the service function
-        application_id = create_customer_application(
+        application_id = create_customer_application_service(
             document_type, document_number
         )
 
@@ -60,7 +60,7 @@ def create_update_application_basic_info(request, application_id):
         email = data['email']
 
         # Call the service function
-        result = create_update_application_basic_info(
+        result = create_update_application_basic_info_service(
             application_id, first_name, last_name, country, state, city, address, mobile_number, email
         )
 
@@ -79,7 +79,7 @@ def create_update_application_basic_info(request, application_id):
 def get_basic_information(request, application_id):
     try:
         # Call the service function
-        result = get_basic_information_by_application_id(application_id)
+        result = get_basic_information_by_application_service(application_id)
 
         # Handle possible errors
         if 'error' in result:
