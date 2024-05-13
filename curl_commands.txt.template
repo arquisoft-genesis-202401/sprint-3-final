@@ -7,15 +7,10 @@ curl -X POST http://<PUBLIC_IP>:<PORT>/create-application/ \
 -d '{
     "document_type": "ID",
     "document_number": "1234567890",
-    "first_name": "John",
-    "last_name": "Doe",
-    "country": "USA",
-    "state": "California",
-    "city": "San Francisco",
-    "address": "101 Example Ave",
-    "mobile_number": "1234567890",
-    "email": "john.doe@example.com"
+    "otp": "123456",
+    "phone_number": "<phone_number>"
 }'
+
 
 curl -X POST http://<PUBLIC_IP>:<PORT>/update-application/1/ \
 -H "Content-Type: application/json" \

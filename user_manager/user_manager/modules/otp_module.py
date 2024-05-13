@@ -1,18 +1,15 @@
 import os
 from twilio.rest import Client
-#from ..settings import VARS
+from ..settings import VARS
 
 class OTPModule:
     def __init__(self):
         """
         Initialize the OTPModule with Twilio client credentials.
         """
-        #self.account_sid = VARS["ACCOUNT_SID"]
-        #self.auth_token = VARS["AUTH_TOKEN"]
-        #self.service_sid = VARS["SERVICE_SID"]
-        self.account_sid = os.getenv("ACCOUNT_SID")
-        self.auth_token = os.getenv("AUTH_TOKEN")
-        self.service_sid = os.getenv("SERVICE_SID")
+        self.account_sid = VARS["ACCOUNT_SID"]
+        self.auth_token = VARS["AUTH_TOKEN"]
+        self.service_sid = VARS["SERVICE_SID"]
         self.client = Client(self.account_sid, self.auth_token)
 
     def send_otp(self, phone_number):
