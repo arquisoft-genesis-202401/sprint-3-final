@@ -54,16 +54,25 @@ def get_latest_application_service(document_type, document_number):
         return None
 
 @transaction.atomic
-def create_update_application_basic_info_service(application_id, first_name, last_name, country, state, city, address, mobile_number, email):
-    # Check if the application exists and is the most recent one
-    # FIX: Debería devolver la última aplicación de un usuario, no en general
+def create_update_application_basic_info_service(document_type, document_number, application_id, first_name, last_name, country, state, city, address, mobile_number, email):
+    # Fetch the customer based on document type and document number
     try:
-        application = Application.objects.get(pk=application_id)
-        latest_application = Application.objects.latest('CreationDate')
-        if application != latest_application:
-            return "Access denied. Updates can only be made to the most recent application."
+        customer = Customer.objects.get(DocumentType=document_type, DocumentNumber=document_number)
+    except Customer.DoesNotExist:
+        return "Customer not found."
+    
+    # Fetch the application to be updated
+    try:
+        application = Application.objects.get(pk=application_id, CustomerID=customer)
     except Application.DoesNotExist:
         return "Application not found."
+
+    # Fetch the latest application for the customer
+    latest_application = Application.objects.filter(CustomerID=customer).latest('CreationDate')
+    
+    # Check if the application is the most recent one
+    if application.id != latest_application.id:
+        return "Access denied. Updates can only be made to the most recent application."
 
     # Initialize the cryptography module
     crypto = CryptoModule()
@@ -95,11 +104,22 @@ def create_update_application_basic_info_service(application_id, first_name, las
 
     return application_id
 
-def get_basic_information_by_application_service(application_id):
+def get_basic_information_by_application_service(document_type, document_number, application_id):
     try:
-        # Ensure the application is the most recent one
-        # FIX: Debería devolver la última aplicación de un usuario, no en general
-        latest_application = Application.objects.latest('CreationDate')
+        # Fetch the customer based on document type and document number
+        customer = Customer.objects.get(DocumentType=document_type, DocumentNumber=document_number)
+    except Customer.DoesNotExist:
+        return {"error": "Customer not found."}
+    
+    try:
+        # Fetch the application to be verified
+        application = Application.objects.get(pk=application_id, CustomerID=customer)
+    except Application.DoesNotExist:
+        return {"error": "Application not found."}
+
+    try:
+        # Ensure the application is the most recent one for the customer
+        latest_application = Application.objects.filter(CustomerID=customer).latest('CreationDate')
         if latest_application.id != application_id:
             return {"error": "Access denied. Only the most recent application's basic information can be retrieved."}
 

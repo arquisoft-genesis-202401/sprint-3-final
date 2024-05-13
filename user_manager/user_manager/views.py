@@ -153,13 +153,15 @@ def create_update_application_basic_info(request, application_id):
         data = json.loads(request.body.decode('utf-8'))
         
         # Payload Checks
-        required_keys = ["first_name", "last_name", "country", "state", "city", "address", "mobile_number", "email"]
+        required_keys = ["document_type", "document_number", "first_name", "last_name", "country", "state", "city", "address", "mobile_number", "email"]
         if len(data) != len(required_keys):
             return HttpResponseBadRequest("Invalid payload fields")
         if not all(key in data for key in required_keys):
             return HttpResponseBadRequest("Missing or invalid required fields")
 
         # Extract data from request
+        document_type = data['document_type']
+        document_number = data['document_number']
         first_name = data['first_name']
         last_name = data['last_name']
         country = data['country']
@@ -171,11 +173,12 @@ def create_update_application_basic_info(request, application_id):
 
         # Call the service function
         result = create_update_application_basic_info_service(
-            application_id, first_name, last_name, country, state, city, address, mobile_number, email
+            document_type, document_number, application_id, first_name, last_name, country, state, city, address, mobile_number, email
         )
 
         # Handle service function responses
-        if result == "Application not found." or "This is not the most recent application. Updates can only be made to the most recent application.":
+        error_messages = ["Customer not found.", "Application not found.", "Access denied. Updates can only be made to the most recent application."]
+        if result in error_messages:
             return HttpResponseBadRequest(result)
 
         # If all goes well, return the application ID
@@ -203,8 +206,22 @@ def get_basic_information(request, application_id):
         if token_application_id != application_id:
             return HttpResponseBadRequest("Token application ID does not match the requested application ID.")
 
+        # Assuming JSON data is sent in request; validate as needed
+        data = json.loads(request.body.decode('utf-8'))
+
+        # Payload Checks
+        required_keys = ["document_type", "document_number"]
+        if len(data) != len(required_keys):
+            return HttpResponseBadRequest("Invalid payload fields")
+        if not all(key in data for key in required_keys):
+            return HttpResponseBadRequest("Missing or invalid required fields")
+
+        # Extract data from request
+        document_type = data['document_type']
+        document_number = data['document_number']
+
         # Call the service function with verified application ID
-        result = get_basic_information_by_application_service(application_id)
+        result = get_basic_information_by_application_service(document_type, document_number, application_id)
 
         # Handle possible errors
         if 'error' in result:

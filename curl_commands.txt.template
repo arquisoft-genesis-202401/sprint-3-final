@@ -12,18 +12,20 @@ curl -X POST http://<PUBLIC_IP>:<PORT>/create-application/ \
 }'
 
 curl -X POST "http://<PUBLIC_IP>:<PORT>/latest-application/" \
-    -H "Content-Type: application/json" \
-    -d '{
-        "document_type": "ID",
-        "document_number": "1234567890",
-        "otp": "123456",
-        "phone_number": "+1234567890"
-    }'
+-H "Content-Type: application/json" \
+-d '{
+    "document_type": "ID",
+    "document_number": "1234567890",
+    "otp": "123456",
+    "phone_number": "+1234567890"
+}'
 
 
 curl -X POST http://<PUBLIC_IP>:<PORT>/update-application/1/ \
 -H "Content-Type: application/json" \
 -d '{
+    "document_type": "ID",
+    "document_number": "1234567890",
     "first_name": "Jane",
     "last_name": "Doe",
     "country": "USA",
@@ -35,4 +37,8 @@ curl -X POST http://<PUBLIC_IP>:<PORT>/update-application/1/ \
 }'
 
 curl -X GET "http://<PUBLIC_IP>:<PORT>/get-basic-information/1/" \
-    -H "Authorization: <your_token_here>"
+-H "Authorization: <your_token_here>" \
+-d '{
+    "document_type": "ID",
+    "document_number": "1234567890"
+}'
