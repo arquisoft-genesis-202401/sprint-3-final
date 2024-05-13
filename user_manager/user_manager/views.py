@@ -81,7 +81,7 @@ def create_customer_application(request):
         traceback.print_exc(file=sys.stdout)
         message = str(e)
         if "twilio" in message:
-            message = "Invalid OTP"
+            message = "Non existing OTP verification"
         return HttpResponseBadRequest(f"An error occurred: {message}")
     
 @require_http_methods(['POST'])
@@ -128,7 +128,22 @@ def create_update_application_basic_info(request, application_id):
 @require_http_methods(['GET'])
 def get_basic_information(request, application_id):
     try:
-        # Call the service function
+        # Extract the token from the request headers
+        token = request.headers.get('Authorization')
+        if not token:
+            return HttpResponseBadRequest("Authorization token is missing.")
+
+        # Initialize SessionModule and verify the token
+        session_module = SessionModule()
+        if not session_module.verify_token(token):
+            return HttpResponseBadRequest("Invalid or expired token.")
+
+        # Extract the application ID from the token
+        token_application_id = session_module.get_application_id(token)
+        if token_application_id != application_id:
+            return HttpResponseBadRequest("Token application ID does not match the requested application ID.")
+
+        # Call the service function with verified application ID
         result = get_basic_information_by_application_service(application_id)
 
         # Handle possible errors

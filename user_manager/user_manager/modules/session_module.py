@@ -36,19 +36,40 @@ class SessionModule:
         return self.encode_token(application_id)
 
     def verify_token(self, token):
-        """ Verify the token by checking the signature """
+        """ Verify the token by checking the signature and expiration date """
         try:
             decoded_token = base64.standard_b64decode(token).decode("utf-8")
             header_json, payload_json, signature = decoded_token.split(";")
+            header = json.loads(header_json)
             header_payload = f"{header_json};{payload_json}"
             
+            # Verify signature
             cryptoModule = CryptoModule()
             expected_signature = cryptoModule.calculate_hmac(header_payload.encode())
-        
-            if signature == expected_signature:
-                return True
-            else:
+            if signature != expected_signature:
                 return False
+
+            # Verify token expiration
+            creation_date = datetime.fromisoformat(header['Creation Date'])
+            ttl = timedelta(seconds=float(header['TTL'].replace(" hours", "")) * 3600)  # Convert hours to seconds
+            expiration_date = creation_date + ttl
+            
+            if datetime.now(self.tzinfo) > expiration_date:
+                return False  # Token has expired
+
+            return True
         except Exception as e:
             print(f"Error verifying token: {e}")
             return False
+    
+    def get_application_id(self, token):
+        """ Verify the token by checking the signature """
+        try:
+            decoded_token = base64.standard_b64decode(token).decode("utf-8")
+            _, payload_json, _ = decoded_token.split(";")
+            payload = json.loads(payload_json.decode('utf-8'))
+            application_id = payload["Application ID"]
+            return application_id
+        except Exception as e:
+            print(f"Error obtaining the application id: {e}")
+            return "Error"

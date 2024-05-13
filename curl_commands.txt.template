@@ -25,4 +25,5 @@ curl -X POST http://<PUBLIC_IP>:<PORT>/update-application/1/ \
     "email": "jane.doe@example.com"
 }'
 
-curl -X GET http://<PUBLIC_IP>:<PORT>/get-basic-information/1/
+curl -X GET "http://<PUBLIC_IP>:<PORT>/get-basic-information/1/" \
+    -H "Authorization: <your_token_here>"
