@@ -8,8 +8,17 @@ curl -X POST http://<PUBLIC_IP>:<PORT>/create-application/ \
     "document_type": "ID",
     "document_number": "1234567890",
     "otp": "123456",
-    "phone_number": "<phone_number>"
+    "phone_number": "+1234567890"
 }'
+
+curl -X POST "http://<PUBLIC_IP>:<PORT>/latest-application/" \
+    -H "Content-Type: application/json" \
+    -d '{
+        "document_type": "ID",
+        "document_number": "1234567890",
+        "otp": "123456",
+        "phone_number": "+1234567890"
+    }'
 
 
 curl -X POST http://<PUBLIC_IP>:<PORT>/update-application/1/ \
