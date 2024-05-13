@@ -129,3 +129,12 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Env Vars
+VARS = { "AES_KEY": os.getenv("AES_KEY"),
+        "HMAC_KEY": os.getenv("HMAC_KEY"),
+        "IV": os.getenv("IV"),
+        "ACCOUNT_SID": os.getenv("ACCOUNT_SID"),
+        "AUTH_TOKEN": os.getenv("AUTH_TOKEN"),
+        "SERVICE_SID": os.getenv("SERVICE_SID")
+    }
