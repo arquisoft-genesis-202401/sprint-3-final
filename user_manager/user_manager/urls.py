@@ -7,5 +7,5 @@ urlpatterns = [
     path('update-application/<int:application_id>/', csrf_exempt(create_update_application_basic_info), name='update_application'),
     path('get-basic-information/<int:application_id>/', csrf_exempt(get_basic_information), name='get_basic_information'),
     path('send-otp/', csrf_exempt(send_otp_to_phone), name='send-otp'),
-    path('api/customer/latest-application/', get_customer_latest_application, name='get_customer_latest_application'),
+    path('api/customer/latest-application/', csrf_exempt(get_customer_latest_application), name='get_customer_latest_application'),
 ]
