@@ -56,6 +56,7 @@ def get_latest_application_service(document_type, document_number):
 @transaction.atomic
 def create_update_application_basic_info_service(application_id, first_name, last_name, country, state, city, address, mobile_number, email):
     # Check if the application exists and is the most recent one
+    # FIX: Debería devolver la última aplicación de un usuario, no en general
     try:
         application = Application.objects.get(pk=application_id)
         latest_application = Application.objects.latest('CreationDate')
@@ -97,6 +98,7 @@ def create_update_application_basic_info_service(application_id, first_name, las
 def get_basic_information_by_application_service(application_id):
     try:
         # Ensure the application is the most recent one
+        # FIX: Debería devolver la última aplicación de un usuario, no en general
         latest_application = Application.objects.latest('CreationDate')
         if latest_application.id != application_id:
             return {"error": "Access denied. Only the most recent application's basic information can be retrieved."}
