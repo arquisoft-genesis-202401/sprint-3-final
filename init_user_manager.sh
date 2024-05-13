@@ -8,6 +8,9 @@ echo 'export POSTGRESQL_DB_PASSWORD="${POSTGRESQL_DB_PASSWORD}"' >> ~/.profile
 echo 'export AES_KEY="${AES_KEY}"' >> ~/.profile
 echo 'export HAMC_KEY="${HAMC_KEY}"' >> ~/.profile
 echo 'export IV="${IV}"' >> ~/.profile
+echo 'export ACCOUNT_SID="${ACCOUNT_SID}"' >> ~/.profile
+echo 'export AUTH_TOKEN="${AUTH_TOKEN}"' >> ~/.profile
+echo 'export SERVICE_SID="${SERVICE_SID}"' >> ~/.profile
 source ~/.profile
 sudo add-apt-repository ppa:deadsnakes/ppa -y
 sudo apt update

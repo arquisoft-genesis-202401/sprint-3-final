@@ -4,81 +4,37 @@ from django.utils import timezone
 from ..modules.crypto_module import CryptoModule
 
 @transaction.atomic
-def create_customer_application_basic_info(
-    document_type: str, document_number: str, first_name: str, last_name: str,
-    country: str, state: str, city: str, address: str, mobile_number: str, email: str
-) -> int:
-    customer, _ = get_or_create_customer(document_type, document_number)
-    status = get_or_create_application_status()
-    application = create_application(customer, status)
-    encrypted_fields = encrypt_and_store_fields(
-        first_name, last_name, country, state, city, address, mobile_number, email
-    )
-    store_basic_information(application, encrypted_fields)
-    return application.pk
-
-def get_or_create_customer(document_type: str, document_number: str):
-    return Customer.objects.get_or_create(
+def create_customer_application(document_type, document_number):
+    # Check if the customer already exists
+    customer, created = Customer.objects.get_or_create(
         DocumentType=document_type,
         DocumentNumber=document_number,
         defaults={'DocumentType': document_type, 'DocumentNumber': document_number}
     )
 
-def get_or_create_application_status():
-    return ApplicationStatus.objects.get_or_create(
+    # Get the predefined ApplicationStatus for "BasicInfo"
+    status, status_created = ApplicationStatus.objects.get_or_create(
         StatusDescription='BasicInfo',
-        defaults={'StatusDescription': 'BasicInfo', 'CreationDate': now(), 'ModificationDate': now()}
+        defaults={'StatusDescription': 'BasicInfo', 'CreationDate': timezone.now(), 'ModificationDate': timezone.now()}
     )
 
-def create_application(customer, status):
-    return Application.objects.create(
+    # Create an Application for this customer with the "BasicInfo" status
+    application = Application.objects.create(
         CustomerID=customer,
         StatusID=status,
-        CreationDate=now(),
-        ModificationDate=now()
+        CreationDate=timezone.now(),
+        ModificationDate=timezone.now()
     )
 
-def encrypt_and_store_fields(*fields: str):
-    crypto = CryptoModule()
-    encrypted_fields = {}
-    field_names = ['FirstName', 'LastName', 'Country', 'State', 'City', 'Address', 'MobileNumber', 'Email']
-
-    for field, name in zip(fields, field_names):
-        encoded_field = field.encode('utf-8')
-        encrypted_fields[name] = encrypt_and_hash_field(crypto, encoded_field)
-
-    return encrypted_fields
-
-def encrypt_and_hash_field(crypto, data):
-    encrypted_data = crypto.encrypt_data(data)
-    data_hmac = crypto.calculate_hmac(data)
-    return encrypted_data + ";" + data_hmac
-
-def store_basic_information(application, encrypted_fields):
-    return BasicInformation.objects.create(
-        ApplicationID=application,
-        **encrypted_fields,
-        CreationDate=now(),
-        ModificationDate=now()
-    )
-
-def now():
-    return timezone.now()
-
+    return application.id
 
 @transaction.atomic
-def update_customer_application_basic_info(application_id, first_name, last_name, country, state, city, address, mobile_number, email):
-    # Check if the application exists and belongs to this customer
+def create_update_application_basic_info(application_id, first_name, last_name, country, state, city, address, mobile_number, email):
+    # Check if the application exists
     try:
         application = Application.objects.get(pk=application_id)
     except Application.DoesNotExist:
         return "Application not found for this customer."
-
-    # Find the BasicInformation linked to the application
-    try:
-        basic_information = BasicInformation.objects.get(ApplicationID=application)
-    except BasicInformation.DoesNotExist:
-        return "Basic Information not found for this application."
 
     # Initialize the cryptography module
     crypto = CryptoModule()
@@ -86,17 +42,27 @@ def update_customer_application_basic_info(application_id, first_name, last_name
     # Encrypt and store each field individually with HMAC
     fields = [first_name, last_name, country, state, city, address, mobile_number, email]
     field_names = ['FirstName', 'LastName', 'Country', 'State', 'City', 'Address', 'MobileNumber', 'Email']
+    encrypted_data_dict = {}
 
     for index, field in enumerate(fields):
         data_to_encrypt = field.encode('utf-8')
         encrypted_data = crypto.encrypt_data(data_to_encrypt)
         data_hmac = crypto.calculate_hmac(data_to_encrypt)
         encrypted_field = encrypted_data + ";" + data_hmac
-        setattr(basic_information, field_names[index], encrypted_field)
+        encrypted_data_dict[field_names[index]] = encrypted_field
 
-    # Update modification date and save the changes
-    basic_information.ModificationDate = timezone.now()
-    basic_information.save()
+    # Find or create the BasicInformation linked to the application
+    basic_information, created = BasicInformation.objects.get_or_create(
+        ApplicationID=application,
+        defaults={**encrypted_data_dict, 'CreationDate': timezone.now()}
+    )
+
+    # If the object was fetched, not created, update the data
+    if not created:
+        for key, value in encrypted_data_dict.items():
+            setattr(basic_information, key, value)
+        basic_information.ModificationDate = timezone.now()
+        basic_information.save()
 
     return application_id
 

@@ -11,6 +11,9 @@ export INTERFACE_2_USER_MANAGER="<INTERFACE>"
 export AES_KEY="<KEY>"
 export HMAC_KEY="<KEY>"
 export IV="<IV>"
+export ACCOUNT_SID="<ACCOUNT_SID>"
+export AUTH_TOKEN="<AUTH_TOKEN>"
+export SERVICE_SID="<SERVICE_SID>"
 
 
 # Business Database env vars

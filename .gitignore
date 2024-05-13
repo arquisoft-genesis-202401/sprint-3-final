@@ -1,10 +1,11 @@
 # My stuff
-otp_script.py
+otp_script*
 sec_script.py
 sec_script_2.py
 set_env_vars.sh
 deployment.yaml
 curl_commands.txt
+Session_Token.txt
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

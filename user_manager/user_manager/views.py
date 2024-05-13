@@ -13,26 +13,20 @@ def create_customer_application(request):
         # Assuming JSON data is sent in request; validate as needed
         data = json.loads(request.body.decode('utf-8'))
         
-        # Check required fields
-        required_keys = ["document_type", "document_number", "first_name", "last_name", "country", "state", "city", "address", "mobile_number", "email"]
+        # Payload Checks
+        required_keys = ["document_type", "document_number"]
+        if len(data) != len(required_keys):
+            return HttpResponseBadRequest("Invalid payload fields")
         if not all(key in data for key in required_keys):
             return HttpResponseBadRequest("Missing required fields")
 
         # Extract data from request
         document_type = data['document_type']
-        document_number = data['document_number']
-        first_name = data['first_name']
-        last_name = data['last_name']
-        country = data['country']
-        state = data['state']
-        city = data['city']
-        address = data['address']
-        mobile_number = data['mobile_number']
-        email = data['email']            
+        document_number = data['document_number']           
 
         # Call the service function
-        application_id = create_customer_application_basic_info(
-            document_type, document_number, first_name, last_name, country, state, city, address, mobile_number, email
+        application_id = create_customer_application(
+            document_type, document_number
         )
 
         # Return the application ID
@@ -43,13 +37,15 @@ def create_customer_application(request):
         return HttpResponseBadRequest(f"An error occurred: {str(e)}")
     
 @require_http_methods(['POST'])
-def update_customer_application(request, application_id):
+def create_update_application_basic_info(request, application_id):
     try:
         # Assuming JSON data is sent in request; validate as needed
         data = json.loads(request.body.decode('utf-8'))
         
-        # Check required fields
+        # Payload Checks
         required_keys = ["first_name", "last_name", "country", "state", "city", "address", "mobile_number", "email"]
+        if len(data) != len(required_keys):
+            return HttpResponseBadRequest("Invalid payload fields")
         if not all(key in data for key in required_keys):
             return HttpResponseBadRequest("Missing required fields")
 
@@ -64,7 +60,7 @@ def update_customer_application(request, application_id):
         email = data['email']
 
         # Call the service function
-        result = update_customer_application_basic_info(
+        result = create_update_application_basic_info(
             application_id, first_name, last_name, country, state, city, address, mobile_number, email
         )
 
