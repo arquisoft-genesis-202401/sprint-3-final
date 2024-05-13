@@ -7,7 +7,7 @@ class SessionModule:
     def __init__(self):
         timezone_offset = -5.0  # UTC-5
         self.tzinfo = timezone(timedelta(hours=timezone_offset))
-        self.ttl = timedelta(minutes=2)
+        self.ttl = timedelta(minutes=15)
 
     def serialize_data(self, application_id):
         """ Serialize header and payload into JSON """
@@ -56,7 +56,6 @@ class SessionModule:
             expiration_date = creation_date + ttl
             
             if datetime.now(self.tzinfo) > expiration_date:
-                print("Expired")
                 return False  # Token has expired
 
             return True

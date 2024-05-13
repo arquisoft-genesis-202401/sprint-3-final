@@ -87,6 +87,21 @@ def create_customer_application(request):
 @require_http_methods(['POST'])
 def create_update_application_basic_info(request, application_id):
     try:
+        # Extract the token from the request headers
+        token = request.headers.get('Authorization')
+        if not token:
+            return HttpResponseBadRequest("Authorization token is missing.")
+
+        # Initialize SessionModule and verify the token
+        session_module = SessionModule()
+        if not session_module.verify_token(token):
+            return HttpResponseBadRequest("Invalid or expired token.")
+
+        # Extract the application ID from the token
+        token_application_id = session_module.get_application_id(token)
+        if token_application_id != application_id:
+            return HttpResponseBadRequest("Token application ID does not match the requested application ID.")
+
         # Assuming JSON data is sent in request; validate as needed
         data = json.loads(request.body.decode('utf-8'))
         
@@ -95,7 +110,7 @@ def create_update_application_basic_info(request, application_id):
         if len(data) != len(required_keys):
             return HttpResponseBadRequest("Invalid payload fields")
         if not all(key in data for key in required_keys):
-            return HttpResponseBadRequest("Missing required fields")
+            return HttpResponseBadRequest("Missing or invalid required fields")
 
         # Extract data from request
         first_name = data['first_name']
@@ -113,9 +128,7 @@ def create_update_application_basic_info(request, application_id):
         )
 
         # Handle service function responses
-        if result == "Application not found.":
-            return HttpResponseBadRequest(result)
-        if result == "This is not the most recent application. Updates can only be made to the most recent application.":
+        if result == "Application not found." or "This is not the most recent application. Updates can only be made to the most recent application.":
             return HttpResponseBadRequest(result)
 
         # If all goes well, return the application ID
