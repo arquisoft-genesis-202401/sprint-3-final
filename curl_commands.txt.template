@@ -1,3 +1,7 @@
+curl -X POST http://<PUBLIC_IP>:<PORT>/send-otp/ \
+-H "Content-Type: application/json" \
+-d '{"phone_number": "+1234567890"}'
+
 curl -X POST http://<PUBLIC_IP>:<PORT>/create-application/ \
 -H "Content-Type: application/json" \
 -d '{

@@ -1,15 +1,18 @@
 import os
 from twilio.rest import Client
-from ..settings import VARS
+#from ..settings import VARS
 
 class OTPModule:
     def __init__(self):
         """
         Initialize the OTPModule with Twilio client credentials.
         """
-        self.account_sid = VARS["ACCOUNT_SID"]
-        self.auth_token = VARS["AUTH_TOKEN"]
-        self.service_sid = VARS["SERVICE_SID"]
+        #self.account_sid = VARS["ACCOUNT_SID"]
+        #self.auth_token = VARS["AUTH_TOKEN"]
+        #self.service_sid = VARS["SERVICE_SID"]
+        self.account_sid = os.getenv("ACCOUNT_SID")
+        self.auth_token = os.getenv("AUTH_TOKEN")
+        self.service_sid = os.getenv("SERVICE_SID")
         self.client = Client(self.account_sid, self.auth_token)
 
     def send_otp(self, phone_number):
@@ -20,7 +23,8 @@ class OTPModule:
         :return: None
         """
         verify = self.client.verify.v2.services(self.service_sid)
-        verify.verifications.create(to=phone_number, channel='sms')
+        result = verify.verifications.create(to=phone_number, channel='sms')
+        return result.status
 
     def verify_otp(self, phone_number, otp_code):
         """

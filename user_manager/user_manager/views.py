@@ -25,10 +25,9 @@ def send_otp_to_phone(request):
         
         # Call the service function to send an OTP
         otp_module = OTPModule()
-        success = otp_module.send_otp(phone_number)
-        print(success)
+        status = otp_module.send_otp(phone_number)
         
-        if success:
+        if status == "pending":
             return JsonResponse({'message': 'OTP sent successfully.', 'phone_number': phone_number})
         else:
             return HttpResponseBadRequest(f"Failed to send OTP")
